@@ -1,76 +1,42 @@
-import React, { useCallback, useMemo, useRef } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Button,
-  SafeAreaView,
-  FlatList,
-} from "react-native";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { View, Text, StyleSheet, Button, SafeAreaView } from "react-native";
 import {
   BottomSheetModal,
   BottomSheetModalProvider,
 } from "@gorhom/bottom-sheet";
+import { FlashList } from "@shopify/flash-list";
+import { CoinDetails } from "./types";
+import { getCryptoMarketData } from "./services/services";
+import CryptoCard from "./components/CryptoCard";
+import { azure } from "./colors/palette";
+import { StatusBar } from "expo-status-bar";
 
 const App = () => {
-  // ref
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const snapPoints = useMemo(() => ["90%"], []);
+  const [coinsDetails, setCoinsDetails] = useState<CoinDetails[]>([]);
 
-  // variables
-  const snapPoints = useMemo(() => ["25%", "50%"], []);
-
-  // callbacks
-  const handlePresentModalPress = useCallback(() => {
-    bottomSheetModalRef.current?.present();
-  }, []);
-  const handleSheetChanges = useCallback((index: number) => {
-    console.log("handleSheetChanges", index);
+  useEffect(() => {
+    getCryptoMarketData().then((data) => setCoinsDetails(data));
   }, []);
 
-  const DATA = [
-    {
-      id: "bd7acbea-c1b1-46c2-aed5-3ad53abb28ba",
-      title: "First Item",
-    },
-    {
-      id: "3ac68afc-c605-48d3-a4f8-fbd91aa97f63",
-      title: "Second Item",
-    },
-    {
-      id: "58694a0f-3da1-471f-bd96-145571e29d72",
-      title: "Third Item",
-    },
-  ];
-
-  const Item = ({ title }: { title: string }) => (
-    <View style={styles.item}>
-      <Text style={styles.title}>{title}</Text>
-      <Button
-        title="Click"
-        onPress={() => bottomSheetModalRef.current?.present()}
-      />
-    </View>
-  );
-
-  // renders
   return (
     <BottomSheetModalProvider>
       <SafeAreaView style={styles.container}>
-        {/* <Button
-          onPress={handlePresentModalPress}
-          title="Present Modal"
-          color="black"
-        /> */}
-        <FlatList
-          data={DATA}
-          renderItem={({ item }) => <Item title={item.title} />}
-          keyExtractor={(item) => item.id}
+        <StatusBar style="auto" />
+        <FlashList
+          data={coinsDetails}
+          renderItem={({ item }) => <CryptoCard item={item} />}
+          // keyExtractor={(item) => item.id}
+          estimatedItemSize={100}
+          // contentContainerStyle={{ backgroundColor: "yellow" }}
+          // numColumns={2}
         />
+
         <BottomSheetModal
           ref={bottomSheetModalRef}
-          index={1}
+          index={0}
           snapPoints={snapPoints}
-          onChange={handleSheetChanges}
         >
           <View style={styles.contentContainer}>
             <Text>Awesome 🎉</Text>
@@ -84,22 +50,13 @@ const App = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // padding: 24,
+    padding: 24,
     justifyContent: "center",
-    backgroundColor: "grey",
+    backgroundColor: azure[50],
   },
   contentContainer: {
     flex: 1,
     alignItems: "center",
-  },
-  item: {
-    backgroundColor: "#f9c2ff",
-    padding: 20,
-    marginVertical: 8,
-    marginHorizontal: 16,
-  },
-  title: {
-    fontSize: 32,
   },
 });
 
