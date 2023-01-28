@@ -1,3 +1,5 @@
+import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
+
 export interface CoinDetails {
   id: string;
   symbol: string;
@@ -26,6 +28,9 @@ export interface CoinDetails {
   roi: Roi | null;
   last_updated: Date;
   price_change_percentage_7d_in_currency: number;
+  sparkline_in_7d: {
+    price: number[];
+  };
 }
 
 export interface Roi {
@@ -38,4 +43,11 @@ export enum Currency {
   Btc = "btc",
   Eth = "eth",
   Usd = "usd",
+}
+
+export interface CryptoCardProps {
+  item: CoinDetails;
+  index: number;
+  setSelectedIndex: React.Dispatch<React.SetStateAction<number>>;
+  bottomSheetModalRef: React.RefObject<BottomSheetModalMethods>;
 }

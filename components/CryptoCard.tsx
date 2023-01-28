@@ -8,12 +8,21 @@ import {
   View,
 } from "react-native";
 import React from "react";
-import { CoinDetails } from "../types";
+import { CoinDetails, CryptoCardProps } from "../types";
 import { azure, turquoise, coral, blue, indigo } from "../colors/palette";
 
-const CryptoCard = ({ item }: { item: CoinDetails }) => {
+const CryptoCard = ({
+  item,
+  index,
+  setSelectedIndex,
+  bottomSheetModalRef,
+}: CryptoCardProps) => {
+  const showBottomSheetModal = () => {
+    setSelectedIndex(index);
+    bottomSheetModalRef.current?.present();
+  };
   return (
-    <TouchableOpacity onPress={() => Alert.alert("clicked")}>
+    <TouchableOpacity onPress={showBottomSheetModal}>
       <View style={{ ...styles.container }}>
         <View style={{ ...styles.leftContent }}>
           <Image source={{ uri: item.image, width: 32, height: 32 }} />
