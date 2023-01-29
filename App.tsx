@@ -26,11 +26,17 @@ import {
   ContributionGraph,
   StackedBarChart,
 } from "react-native-chart-kit";
+import {
+  VictoryChart,
+  VictoryClipContainer,
+  VictoryLine,
+  VictoryTheme,
+} from "victory-native";
 
 const App = () => {
   const { width: SIZE } = useWindowDimensions();
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-  const snapPoints = useMemo(() => ["90%"], []);
+  const snapPoints = useMemo(() => ["52.5%"], []);
   const [coinsDetails, setCoinsDetails] = useState<CoinDetails[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -48,6 +54,11 @@ const App = () => {
   const CryptoDetails = () => {
     const selectedCoin = coinsDetails[selectedIndex];
 
+    let priceData = selectedCoin.sparkline_in_7d.price.map((price, index) => ({
+      x: index,
+      y: price,
+    }));
+
     return (
       <View style={{ ...styles.cryptoDetailsContainer }}>
         <View style={{ ...styles.cryptoDetailsHeader }}>
@@ -64,52 +75,46 @@ const App = () => {
             ${selectedCoin.current_price.toFixed(2)}
           </Text>
         </View>
-        <View>
-          <Text>Bezier Line Chart</Text>
-          <LineChart
-            data={{
-              labels: ["January", "February", "March", "April", "May", "June"],
-              datasets: [
-                {
-                  data: [
-                    Math.random() * 100,
-                    Math.random() * 100,
-                    Math.random() * 100,
-                    Math.random() * 100,
-                    Math.random() * 100,
-                    Math.random() * 100,
-                  ],
-                },
-              ],
-            }}
-            width={Dimensions.get("window").width - 32} // from react-native
-            height={220}
-            yAxisLabel="$"
-            yAxisSuffix="k"
-            yAxisInterval={1} // optional, defaults to 1
-            chartConfig={{
-              backgroundColor: "#e26a00",
-              backgroundGradientFrom: "#fb8c00",
-              backgroundGradientTo: "#ffa726",
-              decimalPlaces: 2, // optional, defaults to 2dp
-              color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-              labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-              style: {
-                borderRadius: 16,
-              },
-              propsForDots: {
-                r: "6",
-                strokeWidth: "2",
-                stroke: "#ffa726",
-              },
-            }}
-            bezier
+
+        <View style={{ ...styles.cryptoDetailsChart }}>
+          <Text
             style={{
-              marginVertical: 8,
-              // padding: 16,
-              borderRadius: 16,
+              ...styles.cryptoDetailsText,
+              fontSize: 24,
+              fontWeight: "900",
+              textAlign: "center",
+              marginBottom: 16,
             }}
-          />
+          >
+            {selectedCoin.name} Trends
+          </Text>
+          <VictoryChart
+            animate={{ duration: 2000, easing: "expInOut" }}
+            theme={{
+              axis: {
+                style: {
+                  tickLabels: { fill: azure[200], padding: 8 },
+                  grid: { stroke: "transparent" },
+                  axis: { stroke: azure[500] },
+                },
+              },
+            }}
+            width={SIZE - 32}
+            style={{
+              parent: {
+                backgroundColor: azure[700],
+                borderRadius: 20,
+              },
+            }}
+          >
+            <VictoryLine
+              interpolation={"natural"}
+              style={{
+                data: { stroke: azure[50] },
+              }}
+              data={priceData}
+            />
+          </VictoryChart>
         </View>
       </View>
     );
@@ -174,7 +179,10 @@ const styles = StyleSheet.create({
   },
   cryptoDetailsContainer: {
     flex: 1,
+    // paddingBottom: 24,
     padding: 16,
+    paddingBottom: 32,
+    justifyContent: "space-between",
   },
   cryptoDetailsHeader: {
     // backgroundColor: azure[300],
@@ -182,8 +190,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  cryptoDetailsChart: {},
-  cryptoDetailsDescription: {},
+  cryptoDetailsChart: {
+    // marginTop: 32,
+  },
+  cryptoDetailsDescription: {
+    marginTop: 32,
+  },
   cryptoDetailsText: {
     color: azure[900],
   },
